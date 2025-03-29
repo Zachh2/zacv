@@ -1,24 +1,24 @@
 module.exports.config = {
-	name: "help",	
+  name: "help",    
   version: "1.0.0", 
-	permission: 0,
-	credits: "zach",
-	description: "get box id", 
-	prefix: true,
+  permission: 0,
+  credits: "zach",
+  description: "get box id", 
+  prefix: true,
   premium: false,
-	category: "without prefix",
-	usages: "groupid",
-	cooldowns: 5, 
-	dependencies: '',
+  category: "without prefix",
+  usages: "groupid",
+  cooldowns: 5, 
+  dependencies: '',
 };
 
 module.exports.languages = {
   "en": {
-    "moduleInfo": "╭──[ %1 ]────⧕\n│ ⭓ %2\n├── INFO\n│ Description: %3\n│ Usage: %4\n│ Category: %5\n│ Cooldown: %6 sec\n│ Permissions: %7\n├─ Module Code By: %8\n╰──────⭔",
-    "helpList": '[ There are %1 commands on this bot. Use: "%2help nameCommand" to learn how to use! ]',
-    "user": "User",
-    "adminGroup": "Admin group",
-    "adminBot": "Admin bot"
+      "moduleInfo": "\u256d──[ %1 ]────⧕\n│ ⭓ %2\n├── INFO\n│ Description: %3\n│ Usage: %4\n│ Category: %5\n│ Cooldown: %6 sec\n│ Permissions: %7\n├─ Module Code By: %8\n╰──────⭔",
+      "helpList": '[ There are %1 commands on this bot. Use: "%2help nameCommand" to learn how to use! ]',
+      "user": "User",
+      "adminGroup": "Admin group",
+      "adminBot": "Admin bot"
   }
 };
 
@@ -30,31 +30,29 @@ const request = require("request");
 module.exports.run = async function ({ api, event, args, getText }) {
   const { commands } = global.client;
   const { threadID, messageID } = event;
-  const command = commands.get((args[0] || "").toLowerCase());
   const prefix = global.config.PREFIX;
   const dateTime = moment().tz("Asia/Manila").format("dddd || D/MM/YYYY || HH:mm:ss");
-
-  if (!command) {
-    let msg = `📜 Available Commands List:\nUse: "${prefix}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
-    
-    commands.forEach((cmd, name) => {
-      msg += `━━━━━━༺༻━━━━━━\n${name}:\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯:${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘮𝘦: ${cmd.config.cooldowns}s)\n\n━━━━━━༺༻━━━━━━`;
-    });
-    
-    msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n🤖 Bot by: Zach`;
-    
-    return api.sendMessage(msg, threadID, messageID);
-  }
-
-  return api.sendMessage(
-    getText(
-      "moduleInfo", command.config.name, command.config.description,
-      `${prefix}${command.config.name} ${command.config.usages || ""}`,
-      command.config.commandCategory, command.config.cooldowns,
-      command.config.hasPermssion === 0 ? getText("user") :
-      command.config.hasPermssion === 1 ? getText("adminGroup") : getText("adminBot"),
-      command.config.credits
-    ),
-    threadID, messageID
-  );
+  
+  let commandList = Array.from(commands.keys());
+  let totalCommands = commandList.length;
+  let itemsPerPage = 5;
+  let totalPages = Math.ceil(totalCommands / itemsPerPage);
+  let page = parseInt(args[0]) || 1;
+  if (page < 1 || page > totalPages) page = 1;
+  
+  let startIndex = (page - 1) * itemsPerPage;
+  let endIndex = startIndex + itemsPerPage;
+  let paginatedCommands = commandList.slice(startIndex, endIndex);
+  
+  let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${prefix}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
+  
+  paginatedCommands.forEach(name => {
+      let cmd = commands.get(name);
+      msg += `━━━━━━༺༻━━━━━━\n${name}:\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯: ${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘔𝘌: ${cmd.config.cooldowns}s\n\n`;
+  });
+  
+  msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n🤖 Bot by: Zach\n`;
+  if (page < totalPages) msg += `Reply with "${prefix}help ${page + 1}" to see more commands.`;
+  
+  return api.sendMessage(msg, threadID, messageID);
 };
