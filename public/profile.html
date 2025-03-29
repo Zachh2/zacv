@@ -479,7 +479,7 @@
     }
     function logOut() {
         const { botid } = getQueryData();
-        toastr.info(`logging out please wait..`, 'Billy');
+        toastr.info(`logging out please wait..`, 'zach');
         fetch('/configure', {
             method: 'POST',
             headers: {
@@ -490,17 +490,17 @@
         .then(response => response.json())
         .then(data => {
             if (data.data) {
-                toastr.success(`logged out successfully`, 'Billy');
+                toastr.success(`logged out successfully`, 'zach');
                 return setInterval(async () => {
                       window.location.href = '/';
                 }, 2000)
             }
             if (data.error) {
-                return toastr.error(`something went wrong while logging out`, 'Billy');
+                return toastr.error(`something went wrong while logging out`, 'zach');
             }
         })
         .catch(err => {
-            return toastr.error(err, 'Billy');
+            return toastr.error(err, 'zach');
         })
     }
     
@@ -510,10 +510,10 @@
         const { botid } = getQueryData();
         button.disabled = true;
         if (!botname) {
-            toastr.error('please enter your new bot name!', 'Billy');
+            toastr.error('please enter your new bot name!', 'zach');
             return button.disabled = false;
         }
-        toastr.info('editing bot name please wait..', 'Billy');
+        toastr.info('editing bot name please wait..', 'zach');
         fetch('/configure', {
             method: 'POST',
             headers: {
@@ -524,13 +524,13 @@
         .then(response => response.json())
         .then(data => {
             if (data.data) {
-                toastr.success(data.data, 'Billy');
+                toastr.success(data.data, 'zach');
                 return setInterval(async () => {
                       window.location.reload();
                 }, 2000)
             }
             if (data.error) {
-                toastr.error(data.error, 'Billy');
+                toastr.error(data.error, 'zach');
                 return button.disabled = false;
             }
         })
@@ -546,10 +546,10 @@
         const { botid } = getQueryData();
         button.disabled = true;
         if (!botadmin) {
-            toastr.error('please enter your facebook id', 'Billy');
+            toastr.error('please enter your facebook id', 'zach');
             return button.disabled = false;
         }
-        toastr.info('adding bot admin please wait..', 'Billy');
+        toastr.info('adding bot admin please wait..', 'zach');
         fetch('/configure', {
             method: 'POST',
             headers: {
@@ -560,13 +560,13 @@
         .then(response => response.json())
         .then(data => {
             if (data.data) {
-                toastr.success(data.data, 'Billy');
+                toastr.success(data.data, 'zach');
                 return setInterval(async () => {
                       window.location.reload();
                 }, 2000)
             }
             if (data.error) {
-                toastr.error(data.error, 'Billy');
+                toastr.error(data.error, 'zach');
                 return button.disabled = false;
             }
         })
