@@ -2,7 +2,7 @@ module.exports.config = {
     name: "balance",
     version: "1.1.0",
     permission: 0,
-    credits: "zach",
+    credits: "Rishad",
     description: "View your balance or the balance of a tagged person",
     prefix: true,
     premium: false,
@@ -11,7 +11,7 @@ module.exports.config = {
     cooldowns: 5,
 };
 
-module.exports.run = async function ({ event, api, args, usersData, getLang, Currencies }) {
+module.exports.run = async function ({ event, api, args, usersData, Currencies }) {
     const { threadID, messageID, senderID, mentions } = event;
     const boldLettersMap = {
         "0": "𝟬", "1": "𝟭", "2": "𝟮", "3": "𝟯", "4": "𝟰",
@@ -22,7 +22,7 @@ module.exports.run = async function ({ event, api, args, usersData, getLang, Cur
         return text.split('').map(char => boldLettersMap[char] || char).join('');
     };
 
-    const loadingMessage = getLang("loading");
+    const loadingMessage = "⏳ Loading...";
     const loadingReply = await api.sendMessage(loadingMessage, threadID, messageID);
 
     setTimeout(async () => {
@@ -30,7 +30,7 @@ module.exports.run = async function ({ event, api, args, usersData, getLang, Cur
         
         if (Object.keys(mentions).length > 0) {
             for (const uid of Object.keys(mentions)) {
-                const userMoney = await Currencies.getData(uid).money || 0;
+                const userMoney = (await Currencies.getData(uid)).money || 0;
                 msg += `${boldTag(mentions[uid].replace("@", ""))} has ${boldTag(userMoney + "$")} in the database system.\n`;
             }
         } else {
