@@ -1,0 +1,63 @@
+module.exports.config = {
+    name: "hi",
+    version: "1.0.0",
+    permission: 0,
+    credits: "zach",
+    prefix: false,
+    description: "Sends a sticker response when greeted",
+    category: "QTV BOX",
+    premium: false,
+    usages: "[text]",
+    cooldowns: 5,
+  };
+  
+  module.exports.handleEvent = async ({ event, api, Users }) => {
+    var { threadID, messageID, body, senderID } = event;
+    function sendMessage(data) {
+      api.sendMessage(data, threadID, messageID);
+    }
+  
+    let greetings = [ 
+      "hello", "hi", "hello po", "hi po", "hiii", "helloo", "loe", "low", "lo", "hey", "heyy",
+      "loe po", "low po", "hai", "chào", "chao", "hí", "híí", "hì", "hìì", "lô", "helo", "hê nhô",
+      "goodevening", "good evening", "goodeve", "gn", "eve", "evening", "good afternoon", "good aftie", "aftie", "afternoon",
+      "yo", "yow", "yoww"
+    ];
+  
+    if (!greetings.includes(body.toLowerCase())) return;
+  
+    let stickers = ["422812141688367", "1775288509378520", "476426593020937", "476420733021523", "147663618749235"];
+    let randomSticker = stickers[Math.floor(Math.random() * stickers.length)];
+  
+    let responses = [
+      "Have you eaten?", "What are you doing?", "How are you?", "I'm a chatbot, nice to meet you!",
+      "I'm updating my commands, what about you?", "Can you interact with me using the sim command?",
+      "You're amazing!", "I love you!", "Are you bored? Talk to my admin!", "How are you today?"
+    ];
+    let randomResponse = responses[Math.floor(Math.random() * responses.length)];
+  
+    let name = await Users.getNameUser(senderID);
+    let moment = require("moment-timezone");
+    let day = moment.tz('Asia/Manila').format('dddd');
+    let session = moment.tz('Asia/Manila').format('A') === 'AM' ? 'morning' : 'evening';
+  
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+  
+    let msg = {
+      body: `Hi ${name}, have a great ${day}! ${capitalizeFirstLetter(randomResponse)}`,
+      mentions: [{ tag: name, id: senderID }]
+    };
+  
+    api.sendMessage(msg, threadID, (err, info) => {
+      setTimeout(() => {
+        api.sendMessage({ sticker: randomSticker }, threadID);
+      }, 100);
+    }, messageID);
+  };
+  
+  module.exports.run = async ({ event, api }) => {
+    return api.sendMessage("This command does not require a prefix.", event.threadID);
+  };
+  
