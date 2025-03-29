@@ -38,7 +38,7 @@ module.exports.run = async function ({ api, event, args, getText }) {
     let msg = `📜 Available Commands List:\nUse: "${prefix}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
     
     commands.forEach((cmd, name) => {
-      msg += `🔹 ${name}: ${cmd.config.description} (Cooldown: ${cmd.config.cooldowns}s)\n`;
+      msg += `━━━━━━༺༻━━━━━━\n${name}:\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯:${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘮𝘦: ${cmd.config.cooldowns}s)\n\n━━━━━━༺༻━━━━━━`;
     });
     
     msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n🤖 Bot by: Zach`;
