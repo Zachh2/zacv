@@ -1,20 +1,26 @@
 module.exports.config = {
     name: "resend",
-    version: "5.0",
-    permission: 2,
+    version: "1.0.1",
+    permission: 0,
     credits: "zach",
+    description: "Anti Unsend mode always enabled (works with audio, video, and images).",
+    category: "system",
     prefix: false,
     premium: false,
-    description: "Anti Unsend mode always enabled (works with audio, video, and images).",
-    category: "Admins",
-    usages: "{pn}",
-    cooldowns: 1,
-    dependencies: []
+    usages: "resend admin only",
+    cooldowns: 1
 };
 
-module.exports.run = async function ({ api, event, threads, message }) {
+module.exports.languages = {
+    "english": {
+        "enabled": "Anti Unsend mode is always enabled.",
+        "errorThreads": "Error: threads is not available."
+    }
+};
+
+module.exports.run = async function ({ api, event, threads, message, getText }) {
     if (!threads || typeof threads.set !== "function") {
-        return message.reply("Error: threads is not available.");
+        return message.reply(getText("errorThreads"));
     }
     
     await threads.set(event.threadID, true, "settings.reSend");
@@ -27,7 +33,7 @@ module.exports.run = async function ({ api, event, threads, message }) {
     }
     global.reSend[event.threadID] = await api.getThreadHistory(event.threadID, 100, undefined);
     
-    return message.reply("Anti Unsend mode is always enabled.");
+    return message.reply(getText("enabled"));
 };
 
 module.exports.onChat = async function ({ api, threads, event }) {
@@ -51,8 +57,4 @@ module.exports.onChat = async function ({ api, threads, event }) {
             global.reSend[event.threadID].shift();
         }
     }
-};
-
-module.exports.handleReply = async function ({ api, event, message, threads }) {
-    return message.reply("This is a reply handler.");
 };

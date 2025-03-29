@@ -1,24 +1,24 @@
 module.exports.config = {
   name: "help",    
-  version: "1.0.0", 
+  version: "1.0.2", 
   permission: 0,
-  credits: "zach",
-  description: "get box id", 
+  credits: "ryuko",
+  description: "beginner's guide", 
   prefix: true,
   premium: false,
-  category: "without prefix",
-  usages: "groupid",
-  cooldowns: 5, 
+  category: "guide",
+  usages: "[Shows Commands]",
+  cooldowns: 5,
   dependencies: '',
 };
 
 module.exports.languages = {
-  "en": {
-      "moduleInfo": "\u256d──[ %1 ]────⧕\n│ ⭓ %2\n├── INFO\n│ Description: %3\n│ Usage: %4\n│ Category: %5\n│ Cooldown: %6 sec\n│ Permissions: %7\n├─ Module Code By: %8\n╰──────⭔",
-      "helpList": '[ There are %1 commands on this bot. Use: "%2help nameCommand" to learn how to use! ]',
+  "english": {
+      "moduleInfo": "%1\n%2\n\nUsage: %3\nCategory: %4\nCooldown: %5 seconds(s)\nPermission: %6\n\nModule code by %7.",
+      "helpList": "THERE ARE %1 COMMANDS AND %2 CATEGORIES",
       "user": "User",
-      "adminGroup": "Admin group",
-      "adminBot": "Admin bot"
+      "adminGroup": "Group admin",
+      "adminBot": "Bot admin"
   }
 };
 
@@ -27,15 +27,14 @@ const axios = require("axios");
 const fs = require("fs");
 const request = require("request");
 
-module.exports.run = async function ({ api, event, args, getText }) {
+module.exports.run = async function ({ api, event, args, getText, botname, prefix }) {
   const { commands } = global.client;
   const { threadID, messageID } = event;
-  const prefix = global.config.PREFIX;
   const dateTime = moment().tz("Asia/Manila").format("dddd || D/MM/YYYY || HH:mm:ss");
   
   let commandList = Array.from(commands.keys());
   let totalCommands = commandList.length;
-  let itemsPerPage = 15;
+  let itemsPerPage = 10;
   let totalPages = Math.ceil(totalCommands / itemsPerPage);
   let page = parseInt(args[0]) || 1;
   if (page < 1 || page > totalPages) page = 1;
@@ -44,15 +43,15 @@ module.exports.run = async function ({ api, event, args, getText }) {
   let endIndex = startIndex + itemsPerPage;
   let paginatedCommands = commandList.slice(startIndex, endIndex);
   
-  let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${global.config.PREFIX}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
+  let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${prefix}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
   
   paginatedCommands.forEach(name => {
       let cmd = commands.get(name);
-      msg += `━━━━━━༺༻━━━━━━\n[ ${name} ]\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯: ${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘔𝘌: ${cmd.config.cooldowns}s\n\n`;
+      msg += `━━━━━━༺༻━━━━━━\n[ ${name} ]\n╰┈➤ Description: ${cmd.config.description}\n╰┈➤ Cooldown: ${cmd.config.cooldowns}s\n\n`;
   });
   
   msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n`;
-  if (page < totalPages) msg += `Type "${global.config.PREFIX}help ${page + 1}" to see more commands.`;
+  if (page < totalPages) msg += `Type "${prefix}help ${page + 1}" to see more commands.`;
   
   return api.sendMessage(msg, threadID, messageID);
 };
