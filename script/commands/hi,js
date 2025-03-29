@@ -13,7 +13,7 @@ module.exports.config = {
 
 module.exports.handleEvent = async ({ event, api, Users }) => {
     var { threadID, messageID, body, senderID } = event;
-    if (!body) return; // Prevent errors when body is undefined/null
+    if (typeof body !== "string") return; // Ensure body is a valid string
 
     const greetings = new Set([
         "hello", "hi", "hello po", "hi po", "hiii", "helloo", "loe", "low", "lo", "hey", "heyy",
@@ -22,7 +22,7 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
         "yo", "yow", "yoww"
     ]);
 
-    if (!greetings.has(body.toLowerCase())) return; // Check if the message is a greeting
+    if (!greetings.has(body.toLowerCase())) return;
 
     const stickers = [
         "422812141688367", "1775288509378520", "476426593020937",
@@ -38,34 +38,34 @@ module.exports.handleEvent = async ({ event, api, Users }) => {
     ];
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
-    const name = await Users.getNameUser(senderID);
-    const moment = require("moment-timezone");
-    const day = moment.tz('Asia/Manila').format('dddd');
-    const hours = moment.tz('Asia/Manila').format('HH');
+    try {
+        const name = await Users.getNameUser(senderID);
+        if (!name) return console.log("Error: Could not fetch user name.");
 
-    let session;
-    if (hours >= 0 && hours < 12) {
-        session = "morning";
-    } else if (hours >= 12 && hours < 18) {
-        session = "afternoon";
-    } else {
-        session = "evening";
-    }
+        const moment = require("moment-timezone");
+        const day = moment.tz('Asia/Manila').format('dddd');
+        const hours = moment.tz('Asia/Manila').format('HH');
 
-    const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+        let session = (hours < 12) ? "morning" : (hours < 18) ? "afternoon" : "evening";
 
-    const msg = {
-        body: `Hi ${name}, have a great ${day}! ${capitalizeFirstLetter(randomResponse)}`,
-        mentions: [{ tag: name, id: senderID }]
-    };
+        const capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 
-    api.sendMessage(msg, threadID, (err, info) => {
-        if (!err) {
+        const msg = {
+            body: `Hi ${name}, have a great ${day}! ${capitalizeFirstLetter(randomResponse)}`,
+            mentions: [{ tag: name, id: senderID }]
+        };
+
+        api.sendMessage(msg, threadID, (err) => {
+            if (err) return console.error("Error sending message:", err);
             setTimeout(() => {
-                api.sendMessage({ sticker: randomSticker }, threadID);
+                api.sendMessage({ sticker: randomSticker }, threadID, (stickerErr) => {
+                    if (stickerErr) console.error("Error sending sticker:", stickerErr);
+                });
             }, 100);
-        }
-    }, messageID);
+        }, messageID);
+    } catch (error) {
+        console.error("Error in handleEvent:", error);
+    }
 };
 
 module.exports.run = async ({ event, api }) => {

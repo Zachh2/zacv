@@ -3,7 +3,7 @@ module.exports.config = {
     version: '1.6',
     permission: 0,
     credits: 'zach',
-    prefix: true,
+    prefix: false,
     premium: false,
     description: 'Enable do not disturb mode.',
     category: 'without prefix',
@@ -12,27 +12,19 @@ module.exports.config = {
     dependencies: []
 };
 
-module.exports.run = async function({ api, event, args, Users, usersData }) {
+module.exports.run = async function({ api, event, args, Users }) {
     const { senderID } = event;
 
-    // Ensure usersData exists and is accessible
-    if (!usersData || typeof usersData.get !== 'function' || typeof usersData.set !== 'function') {
-        return api.sendMessage('⚠️ | Error: usersData is not available.', event.threadID, event.messageID);
-    }
-
-    // Fetch user data
-    let userData = await usersData.get(senderID);
-    if (!userData) userData = { data: {} }; // Initialize if undefined
+    let userData = global.db.allUserData.find(item => item.userID == senderID);
+    if (!userData) userData = { data: {} };
 
     if (args[0] === 'off') {
-        delete userData.data.busy; // Remove busy status
-        await usersData.set(senderID, userData, 'data'); // Save changes
+        delete userData.data.busy;
         return api.sendMessage('✅ | Do not disturb mode has been turned off', event.threadID, event.messageID);
     }
 
     const reason = args.join(' ') || 'No reason provided';
-    userData.data.busy = reason; // Set busy reason
-    await usersData.set(senderID, userData, 'data'); // Save changes
+    userData.data.busy = reason;
 
     return api.sendMessage(
         `✅ | Do not disturb mode has been turned on${reason ? ` with reason: ${reason}` : ''}`,

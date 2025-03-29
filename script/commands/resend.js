@@ -12,12 +12,12 @@ module.exports.config = {
     dependencies: []
 };
 
-module.exports.run = async function ({ api, event, threadsData, message }) {
-    if (!threadsData || typeof threadsData.set !== "function") {
-        return message.reply("Error: threadsData is not available.");
+module.exports.run = async function ({ api, event, threads, message }) {
+    if (!threads || typeof threads.set !== "function") {
+        return message.reply("Error: threads is not available.");
     }
     
-    await threadsData.set(event.threadID, true, "settings.reSend");
+    await threads.set(event.threadID, true, "settings.reSend");
     
     if (!global.reSend) {
         global.reSend = {};
@@ -30,13 +30,13 @@ module.exports.run = async function ({ api, event, threadsData, message }) {
     return message.reply("Anti Unsend mode is always enabled.");
 };
 
-module.exports.onChat = async function ({ api, threadsData, event }) {
-    if (!threadsData || typeof threadsData.get !== "function") {
+module.exports.onChat = async function ({ api, threads, event }) {
+    if (!threads || typeof threads.get !== "function") {
         return;
     }
     
     if (event.type !== "message_unsend") {
-        let resend = await threadsData.get(event.threadID, "settings.reSend");
+        let resend = await threads.get(event.threadID, "settings.reSend");
         if (!resend) return;
 
         if (!global.reSend) {
@@ -51,4 +51,8 @@ module.exports.onChat = async function ({ api, threadsData, event }) {
             global.reSend[event.threadID].shift();
         }
     }
+};
+
+module.exports.handleReply = async function ({ api, event, message, threads }) {
+    return message.reply("This is a reply handler.");
 };
