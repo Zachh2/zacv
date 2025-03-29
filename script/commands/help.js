@@ -35,7 +35,7 @@ module.exports.run = async function ({ api, event, args, getText }) {
   
   let commandList = Array.from(commands.keys());
   let totalCommands = commandList.length;
-  let itemsPerPage = 5;
+  let itemsPerPage = 15;
   let totalPages = Math.ceil(totalCommands / itemsPerPage);
   let page = parseInt(args[0]) || 1;
   if (page < 1 || page > totalPages) page = 1;
@@ -44,15 +44,15 @@ module.exports.run = async function ({ api, event, args, getText }) {
   let endIndex = startIndex + itemsPerPage;
   let paginatedCommands = commandList.slice(startIndex, endIndex);
   
-  let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${prefix}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
+  let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${global.config.PREFIX}help <command name>" for more details\n━━━━━━༺༻━━━━━━\n`;
   
   paginatedCommands.forEach(name => {
       let cmd = commands.get(name);
-      msg += `━━━━━━༺༻━━━━━━\n${name}:\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯: ${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘔𝘌: ${cmd.config.cooldowns}s\n\n`;
+      msg += `━━━━━━༺༻━━━━━━\n[ ${name} ]\n╰┈➤ 𝘋𝘦𝘴𝘤𝘳𝘪𝘱𝘵𝘪𝘰𝘯: ${cmd.config.description}\n╰┈➤ 𝘞𝘢𝘪𝘵𝘪𝘯𝘨 𝘛𝘐𝘔𝘌: ${cmd.config.cooldowns}s\n\n`;
   });
   
-  msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n🤖 Bot by: Zach\n`;
-  if (page < totalPages) msg += `Reply with "${prefix}help ${page + 1}" to see more commands.`;
+  msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n`;
+  if (page < totalPages) msg += `Type "${global.config.PREFIX}help ${page + 1}" to see more commands.`;
   
   return api.sendMessage(msg, threadID, messageID);
 };
