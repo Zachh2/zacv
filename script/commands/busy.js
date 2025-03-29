@@ -3,7 +3,7 @@ module.exports.config = {
     version: '1.6',
     permission: 0,
     credits: 'zach',
-    prefix: false,
+    prefix: true,
     premium: false,
     description: 'Enable do not disturb mode.',
     category: 'without prefix',
@@ -12,11 +12,17 @@ module.exports.config = {
     dependencies: []
 };
 
-module.exports.run = async function({ api, event, args, Users }) {
+module.exports.run = async function({ api, event, args }) {
     const { senderID } = event;
+    
+    if (!global.db) global.db = {};
+    if (!global.db.allUserData) global.db.allUserData = [];
 
     let userData = global.db.allUserData.find(item => item.userID == senderID);
-    if (!userData) userData = { data: {} };
+    if (!userData) {
+        userData = { userID: senderID, data: {} };
+        global.db.allUserData.push(userData);
+    }
 
     if (args[0] === 'off') {
         delete userData.data.busy;
@@ -37,6 +43,9 @@ module.exports.handleEvent = async function({ api, event }) {
     const { mentions } = event;
     if (!mentions || Object.keys(mentions).length === 0) return;
     
+    if (!global.db) global.db = {};
+    if (!global.db.allUserData) global.db.allUserData = [];
+
     for (const userID of Object.keys(mentions)) {
         const userData = global.db.allUserData.find(item => item.userID == userID);
         const reasonBusy = userData?.data?.busy || false;
