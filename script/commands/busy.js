@@ -2,8 +2,8 @@ module.exports.config = {
     name: 'busy',
     version: '1.6',
     permission: 0,
-    credits: 'NTKhang',
-    prefix: false,
+    credits: 'zach',
+    prefix: true,
     premium: false,
     description: 'Enable do not disturb mode.',
     category: 'without prefix',
@@ -15,32 +15,43 @@ module.exports.config = {
 module.exports.run = async function({ api, event, args, Users, usersData }) {
     const { senderID } = event;
 
+    // Ensure usersData exists and is accessible
+    if (!usersData || typeof usersData.get !== 'function' || typeof usersData.set !== 'function') {
+        return api.sendMessage('⚠️ | Error: usersData is not available.', event.threadID, event.messageID);
+    }
+
+    // Fetch user data
+    let userData = await usersData.get(senderID);
+    if (!userData) userData = { data: {} }; // Initialize if undefined
+
     if (args[0] === 'off') {
-        const { data } = await usersData.get(senderID);
-        delete data.busy;
-        await usersData.set(senderID, data, 'data');
+        delete userData.data.busy; // Remove busy status
+        await usersData.set(senderID, userData, 'data'); // Save changes
         return api.sendMessage('✅ | Do not disturb mode has been turned off', event.threadID, event.messageID);
     }
 
-    const reason = args.join(' ') || '';
-    await usersData.set(senderID, reason, 'data.busy');
+    const reason = args.join(' ') || 'No reason provided';
+    userData.data.busy = reason; // Set busy reason
+    await usersData.set(senderID, userData, 'data'); // Save changes
+
     return api.sendMessage(
-        reason ? `✅ | Do not disturb mode has been turned on with reason: ${reason}` : '✅ | Do not disturb mode has been turned on',
+        `✅ | Do not disturb mode has been turned on${reason ? ` with reason: ${reason}` : ''}`,
         event.threadID,
         event.messageID
     );
 };
 
-module.exports.handleEvent = async function({ api, event, args, Users }) {
+module.exports.handleEvent = async function({ api, event }) {
     const { mentions } = event;
     if (!mentions || Object.keys(mentions).length === 0) return;
     
     for (const userID of Object.keys(mentions)) {
-        const reasonBusy = global.db.allUserData.find(item => item.userID == userID)?.data.busy || false;
+        const userData = global.db.allUserData.find(item => item.userID == userID);
+        const reasonBusy = userData?.data?.busy || false;
+        
         if (reasonBusy !== false) {
             return api.sendMessage(
-                reasonBusy ? `User ${mentions[userID].replace('@', '')} is currently busy with reason: ${reasonBusy}` :
-                `User ${mentions[userID].replace('@', '')} is currently busy`,
+                `User ${mentions[userID].replace('@', '')} is currently busy${reasonBusy ? ` with reason: ${reasonBusy}` : ''}.`,
                 event.threadID,
                 event.messageID
             );
