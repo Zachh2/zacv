@@ -50,7 +50,7 @@ module.exports.run = async function ({ api, event, args, getText, botname, prefi
     let endIndex = startIndex + itemsPerPage;
     let paginatedCommands = commandList.slice(startIndex, endIndex);
     
-    let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: "${prefix}help <command name>" for details\n━━━━━━༺༻━━━━━━\n`;
+    let msg = `📜 Available Commands List (Page ${page}/${totalPages}):\nUse: \"${prefix}help <command name>\" for details\n━━━━━━༺༻━━━━━━\n`;
     
     paginatedCommands.forEach(name => {
       let cmd = commands.get(name);
@@ -60,31 +60,51 @@ module.exports.run = async function ({ api, event, args, getText, botname, prefi
     });
     
     msg += `━━━━━━༺༻━━━━━━\n📅 ${dateTime}\n`;
-    if (page < totalPages) msg += `Type "${prefix}help ${page + 1}" to see more commands.`;
+    if (page < totalPages) msg += `Type \"${prefix}help ${page + 1}\" to see more commands.`;
     
-    return api.sendMessage(
-      getText(
-        "moduleInfo",
-        command.config.name,
-        command.config.description,
-        `${prefix}${command.config.name} ${command.config.usages ? command.config.usages : ""}`,
-        command.config.category,
-        command.config.cooldowns,
-        command.config.permission === 0
-          ? getText("user")
-          : command.config.permission === 1
-          ? getText("adminGroup")
-          : getText("adminBot"),
-        command.config.credits
-      ),
-      threadID, async (error, info) => {
-        if (autoUnsend) {
-          await new Promise(resolve => setTimeout(resolve, delayUnsend * 1000));
-          return api.unsendMessage(info.messageID);
-        }
-      }, messageID);
+    return api.sendMessage(msg, threadID, async (error, info) => {
+      if (autoUnsend) {
+        await new Promise(resolve => setTimeout(resolve, delayUnsend * 1000));
+        return api.unsendMessage(info.messageID);
+      }
+    }, messageID);
   } catch (error) {
     console.error("[HELP COMMAND ERROR]:", error);
     return api.sendMessage("⚠️ An error occurred while fetching the help command.", event.threadID, event.messageID);
   }
+};
+
+module.exports.handleEvent = function ({ api, event, getText, botname, prefix }) {
+  const { commands } = global.client;
+  const { threadID, messageID, body } = event;  
+
+  if (!body || typeof body == "undefined" || body.indexOf("help") != 0)
+    return;
+  const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
+  if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
+  const command = commands.get(splitBody[1].toLowerCase());
+  return api.sendMessage(
+    getText(
+      "moduleInfo",
+      command.config.name,
+      command.config.description,
+      `${prefix}${command.config.name} ${
+        command.config.usages ? command.config.usages : ""
+      }`,
+      command.config.category,
+      command.config.cooldowns,
+      command.config.permission === 0
+        ? getText("user")
+        : command.config.permission === 1
+        ? getText("adminGroup")
+        : getText("adminBot"),
+      command.config.credits
+    ),
+    threadID, async (error, info) => {
+      if (autoUnsend) {
+        await new Promise(resolve => setTimeout(resolve, delayUnsend * 500));
+        return api.unsendMessage(info.messageID);
+      } else return;
+    }, messageID
+  );
 };
