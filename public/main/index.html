@@ -13,18 +13,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-      body {
-        background-color: #1e1e1e;
-        color: #fff;
-        font-family: 'Poppins', sans-serif;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        width: 100%;
-        box-sizing: border-box;
-      }
+     body {
+  background-color: #1e1e1e;
+  color: #d8b5ff; /* Light purple color */
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bio, .cmddes, .github-profile, .toast-info, p, h5, .user-info h4, .user-info p {
+  color: #d8b5ff; /* Apply light purple color */
+}
+
+button {
+  color: #d8b5ff; /* Light purple */
+  border: 1px solid #d8b5ff;
+}
+
+button:hover {
+  opacity: 0.5;
+}
+
+textarea[type="text"],
+input[type="text"],
+input[type="password"] {
+  color: #d8b5ff;
+}
 
       #icon-mainn {
         border-radius: 50%;
@@ -759,7 +778,7 @@
         </textarea>
         <input type="password" id="password" placeholder="password">
         </textarea>
-        <input type="text" id="botName" placeholder="bot name ( ex: ryuko )">
+        <input type="text" id="botName" placeholder="bot name ( ex: zach )">
         </textarea>
         <input type="text" id="botPrefix" placeholder="bot prefix ( symbol )">
         </textarea>
@@ -828,7 +847,7 @@
   <script>
       const backgroundm = document.querySelector(".play-background");
     Swal.fire({
-      title: `<p style="font-size: 15px; margin-top: -15px; margin-bottom: -10px;">Ryuko V5</p>`,
+      title: `<p style="font-size: 15px; margin-top: -15px; margin-bottom: -10px;"ChatbotV6</p>`,
       icon: "info",
       html: `<p style="font-size: 8px;">This project is not for sale, you can use it for free.</p>`,
       background: '#1e1e1e',
