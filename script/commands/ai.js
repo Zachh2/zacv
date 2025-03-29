@@ -2,7 +2,7 @@ module.exports.config = {
 	name: "ai",
 	credits: "ryuko",
 	version: '1.0.0',
-	description: "talk with gemini 2.0 flash exp",
+	description: "talk with AI using the provided API",
 	prefix: false,
 	premium: true,
 	permission: 0,
@@ -11,53 +11,42 @@ module.exports.config = {
 	dependencies: {
 		"axios": ""
 	}
-}
+};
+
 const axios = require("axios");
-module.exports.handleEvent = async function({api, event, botname }) {
+
+module.exports.handleEvent = async function({ api, event, botname }) {
 	try {
 		const ask = event.body?.toLowerCase() || '';
 		if (ask.includes(botname.toLowerCase())) {
-			try {
-				const escapedBotname = botname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-				const processedAsk = ask
-					.replace(new RegExp(escapedBotname, 'gi'), '')
-					.replace(/\s+/g, ' ')
-					.trim()
-					.replace(/\s+([,.?!])/g, '$1');
+			const escapedBotname = botname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			const processedAsk = ask
+				.replace(new RegExp(escapedBotname, 'gi'), '')
+				.replace(/\s+/g, ' ')
+				.trim()
+				.replace(/\s+([,.?!])/g, '$1');
 
-				try {
-					const attachment = event.messageReply.attachments[0].url;
-					const res = await axios.get(`https://character.ryukodev.gleeze.com/api?name=gemini&message=${encodeURIComponent(processedAsk)}&imgUrl=${encodeURIComponent(attachment)}`);
-					const reply = res.data.message;
-					return api.sendMessage(reply, event.threadID, event.messageID);
-				} catch (err) {
-					const res = await axios.get(`https://character.ryukodev.gleeze.com/api?name=gemini&message=${encodeURIComponent(processedAsk)}`);
-					const reply = res.data.message;
-					return api.sendMessage(reply, event.threadID, event.messageID);
-				}
+			try {
+				const res = await axios.get(`http://87.106.100.187:6312/api/copilot?prompt=${encodeURIComponent(processedAsk)}`);
+				const reply = res.data.result;
+				return api.sendMessage(reply, event.threadID, event.messageID);
 			} catch (error) {
-				return api.sendMessage("failed to get a response from the api.", event.threadID, event.messageID);
+				return api.sendMessage("Failed to get a response from the API.", event.threadID, event.messageID);
 			}
 		}
 	} catch (error) {}
 };
-module.exports.run = async function({ api, event, args, botname }) {
+
+module.exports.run = async function({ api, event, args }) {
 	const ask = args.join(' ');
 	if (!ask) {
-		return api.sendMessage(`please provide a message`, event.threadID, event.messageID);
+		return api.sendMessage("Please provide a message.", event.threadID, event.messageID);
 	}
 	try {
-		try {
-			const attachment = event.messageReply.attachments[0].url;
-			const res = await axios.get(`https://character.ryukodev.gleeze.com/api?name=gemini&message=${encodeURIComponent(ask)}&imgUrl=${encodeURIComponent(attachment)}`);
-			const reply = res.data.message;
-			return api.sendMessage(reply, event.threadID, event.messageID);
-		} catch (err) {
-			const res = await axios.get(`https://character.ryukodev.gleeze.com/api?name=gemini&message=${encodeURIComponent(ask)}`);
-			const reply = res.data.message;
-			return api.sendMessage(reply, event.threadID, event.messageID);
-		}
+		const res = await axios.get(`http://87.106.100.187:6312/api/copilot?prompt=${encodeURIComponent(ask)}`);
+		const reply = res.data.result;
+		return api.sendMessage(reply, event.threadID, event.messageID);
 	} catch (error) {
-		return api.sendMessage("failed to get a response from the api.", event.threadID, event.messageID);
+		return api.sendMessage("Failed to get a response from the API.", event.threadID, event.messageID);
 	}
-}
+};
